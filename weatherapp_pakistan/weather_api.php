@@ -1,9 +1,9 @@
 <?php
 // Database credentials
-$host = "10.0.3.29";
-$user = "pakistan_user";
-$password = "Pakistan@123"; // update if needed
-$database = "weather_db_pakistan"; // make sure this matches your actual DB
+$host = "Your Database hostname"; // update it accordingly
+$user = "Database user name"; // update it accordingly
+$password = "Password of database user"; // update it accordingly
+$database = "Your Database name"; // make sure this matches your actual DB
 
 // Create connection
 $conn = new mysqli($host, $user, $password, $database);

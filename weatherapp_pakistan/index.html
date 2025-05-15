@@ -268,7 +268,7 @@ function getWeather() {
   result.style.display = "none";
   loading.style.display = "block";
 
-  fetch('http://13.49.18.183/weather_api.php?city=' + encodeURIComponent(city))
+  fetch('your backend server IP Address' + encodeURIComponent(city))
   .then(response => response.json())
   .then(data => {
     loading.style.display = "none";
