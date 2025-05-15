@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Pakistan Weather Info</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --main-bg: linear-gradient(135deg, #74ebd5, #ACB6E5);
+      --card-bg: #ffffff;
+      --button-bg: #74ebd5;
+      --button-hover: #57c8ba;
+      --text-color: #333;
+      --input-border: #ddd;
+      --toast-bg: #323232;
+      --toast-color: #fff;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --main-bg: linear-gradient(135deg, #1e1e1e, #323232);
+        --card-bg: #2b2b2b;
+        --button-bg: #57c8ba;
+        --button-hover: #74ebd5;
+        --text-color: #f0f0f0;
+        --input-border: #555;
+        --toast-bg: #f0f0f0;
+        --toast-color: #222;
+      }
+    }
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Poppins', sans-serif;
+    }
+    body {
+      height: 100vh;
+      background: var(--main-bg);
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      position: relative;
+    }
+    .background-clouds {
+      position: absolute;
+      width: 200%;
+      height: 200%;
+      background: url('https://i.imgur.com/QU5QYFf.png') repeat;
+      background-size: contain;
+      animation: floatClouds 60s linear infinite;
+      opacity: 0.05;
+      z-index: 0;
+    }
+    @keyframes floatClouds {
+      from { transform: translate(0, 0); }
+      to { transform: translate(-50%, -50%); }
+    }
+    .container {
+      background: var(--card-bg);
+      padding: 30px 40px;
+      border-radius: 20px;
+      box-shadow: 0px 8px 24px rgba(0,0,0,0.2);
+      width: 100%;
+      max-width: 500px;
+      text-align: center;
+      animation: fadeIn 1s ease forwards;
+      position: relative;
+      z-index: 1;
+    }
+    h1 {
+      margin-bottom: 20px;
+      color: var(--text-color);
+      font-weight: 700;
+    }
+    .autocomplete {
+      position: relative;
+      width: 100%;
+    }
+    input {
+      width: 100%;
+      padding: 14px;
+      margin-top: 10px;
+      margin-bottom: 20px;
+      border: 2px solid var(--input-border);
+      border-radius: 10px;
+      font-size: 16px;
+      background: transparent;
+      color: var(--text-color);
+    }
+    input:focus {
+      border-color: var(--button-bg);
+      outline: none;
+    }
+    .suggestions {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      background: var(--card-bg);
+      border: 1px solid var(--input-border);
+      max-height: 150px;
+      overflow-y: auto;
+      z-index: 5;
+      border-radius: 0 0 10px 10px;
+    }
+    .suggestions div {
+      padding: 10px;
+      cursor: pointer;
+    }
+    .suggestions div:hover {
+      background: var(--button-hover);
+      color: white;
+    }
+    button {
+      background: var(--button-bg);
+      color: white;
+      border: none;
+      padding: 14px 22px;
+      border-radius: 10px;
+      font-size: 16px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.3s;
+      position: relative;
+    }
+    button:hover {
+      background: var(--button-hover);
+    }
+    .result {
+      margin-top: 20px;
+      text-align: left;
+      padding: 20px;
+      background: var(--card-bg);
+      color: var(--text-color);
+      border: 1px solid var(--input-border);
+      border-radius: 10px;
+      display: none;
+      animation: fadeIn 0.8s forwards;
+    }
+    .loading {
+      margin-top: 20px;
+      display: none;
+      font-size: 18px;
+      color: var(--text-color);
+    }
+    .dots span {
+      animation: pulse 1.5s infinite;
+      font-size: 30px;
+      display: inline-block;
+    }
+    .dots span:nth-child(2) { animation-delay: 0.3s; }
+    .dots span:nth-child(3) { animation-delay: 0.6s; }
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.5); }
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px);}
+      to { opacity: 1; transform: translateY(0);}
+    }
+    #toast {
+      position: fixed;
+      bottom: 30px;
+      right: 30px;
+      background: var(--toast-bg);
+      color: var(--toast-color);
+      padding: 15px 20px;
+      border-radius: 10px;
+      display: none;
+      z-index: 9999;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    }
+    #preloader {
+      position: fixed;
+      width: 100%;
+      height: 100%;
+      background: var(--main-bg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      transition: opacity 0.5s ease;
+    }
+    #preloader.done {
+      opacity: 0;
+      pointer-events: none;
+    }
+  </style>
+</head>
+<body>
+
+<div class="background-clouds"></div>
+
+<div id="preloader">
+  <div class="dots"><span>.</span><span>.</span><span>.</span></div>
+</div>
+
+<div class="container">
+  <h1>Pakistan Weather Info</h1>
+  <div class="autocomplete">
+    <input type="text" id="city" placeholder="Enter city name (e.g. Lahore)" autocomplete="off" />
+    <div class="suggestions" id="suggestions"></div>
+  </div>
+  <button onclick="getWeather()">Get Weather</button>
+
+  <div class="loading" id="loading">
+    <div class="dots"><span>.</span><span>.</span><span>.</span></div>
+  </div>
+
+  <div class="result" id="result">
+    <h2 id="cityName"></h2>
+    <p><strong>Temperature:</strong> <span id="temperature"></span> °C</p>
+    <p><strong>Wind Speed:</strong> <span id="windSpeed"></span> km/h</p>
+    <p><strong>Condition:</strong> <span id="condition"></span></p>
+    <p><strong>Recommendation:</strong></p>
+    <p id="recommendation" style="font-style: italic;"></p>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+const cities = ["Lahore", "Karachi", "Islamabad", "Rawalpindi", "Peshawar", "Quetta", "Multan", "Faisalabad", "Sialkot", "Hyderabad", "Sukkur", "Sargodha", "Bahawalpur"];
+
+function showSuggestions(value) {
+  const suggestionBox = document.getElementById('suggestions');
+  suggestionBox.innerHTML = "";
+  if (value.length > 0) {
+    const matches = cities.filter(city => city.toLowerCase().startsWith(value.toLowerCase()));
+    matches.forEach(match => {
+      const div = document.createElement('div');
+      div.innerText = match;
+      div.onclick = () => {
+        document.getElementById('city').value = match;
+        suggestionBox.innerHTML = "";
+      };
+      suggestionBox.appendChild(div);
+    });
+  }
+}
+
+document.getElementById('city').addEventListener('input', function() {
+  showSuggestions(this.value);
+});
+
+function showToast(message) {
+  const toast = document.getElementById("toast");
+  toast.innerText = message;
+  toast.style.display = "block";
+  setTimeout(() => {
+    toast.style.display = "none";
+  }, 3000);
+}
+
+function getWeather() {
+  const city = document.getElementById("city").value.trim();
+  const loading = document.getElementById("loading");
+  const result = document.getElementById("result");
+
+  if (!city) {
+    showToast("❌ Please enter a city name!");
+    result.style.display = "none";
+    return;
+  }
+
+  result.style.display = "none";
+  loading.style.display = "block";
+
+  fetch('http://13.49.18.183/weather_api.php?city=' + encodeURIComponent(city))
+  .then(response => response.json())
+  .then(data => {
+    loading.style.display = "none";
+    if (data["0"]) {
+      const weatherData = data["0"];
+      document.getElementById("cityName").innerText = weatherData.city || city;
+      document.getElementById("temperature").innerText = weatherData.temperature ?? "--";
+      document.getElementById("windSpeed").innerText = weatherData.wind_speed ?? "--";
+      document.getElementById("condition").innerText = weatherData.condition ?? "N/A";
+      document.getElementById("recommendation").innerText = weatherData.recommendation ?? "No suggestion available.";
+      result.style.display = "block";
+      showToast("✅ Weather data loaded!");
+    } else {
+      showToast("⚠️ No data found for this city.");
+    }
+  })
+  .catch(() => {
+    loading.style.display = "none";
+    showToast("❌ Unable to fetch data!");
+  });
+
+}
+
+// Preloader
+window.addEventListener('load', function() {
+  document.getElementById('preloader').classList.add('done');
+});
+</script>
+
+</body>
+</html>
